@@ -71,14 +71,6 @@ def capturer():
             # On ajoute la lettre dans la ligne
             ligne.append(text)
 
-            """
-            #print(pytesseract.image_to_boxes("grabbed.png"))
-            capture =  np.array(image)
-            cv2.imshow('window',cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
-
-            if cv2.waitKey(1025) & 0xFF == ord('q'):
-                return grille
-            """
 
         # On met la ligne complète dans la grille
         grille.append(ligne)
@@ -86,14 +78,4 @@ def capturer():
 
 
 
-if __name__ == '__main__':
-    pass
-    """
-    while 1:
-        grille=capturer()
-        print(grille)
-        if cv2.waitKey(1025) & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-            break
-    """
 
