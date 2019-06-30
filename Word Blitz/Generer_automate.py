@@ -79,18 +79,14 @@ class Noeud():
 
 
 if __name__ == '__main__':
-    # Comme on n'a pas le temps de faire tous les mots, on ne fait que ceux ayant plus du seuil comme nombre de lettre
-    seuil_max = 8
-    seuil_min = 5
 
     depart=Noeud("")
     # Création de l'automate à partir du dico.txt
     with open('dico.txt', 'r') as dico:
         for mot in dico:
-            if seuil_min>len(mot.rstrip('\n')):
-                depart.ajouter(mot.rstrip('\n')) # rstrip pour retirer le \n en trop
+            depart.ajouter(mot.rstrip('\n')) # rstrip pour retirer le \n en trop
     # On enregistre notre automate
-    pickle.dump(depart, open('automate_moins_de_{}_lettres'.format(4), 'wb'))
+    pickle.dump(depart, open('automate', 'wb'))
 
 
 
