@@ -24,11 +24,11 @@ from Generer_automate import Noeud # La classe qui a permis de faire le dictionn
 
 # On charge le dictionnaire (sauvegardé sous forme d'automate (cf le fichier Generer_automate.py))
 # !!!! Un peu long à charger
-#dico=pickle.load(open('automate', 'rb')) # dico avec tous les mots
+dico=pickle.load(open('automate', 'rb')) # dico avec tous les mots
 # On va découper la recherche en 2 : Les mots de plus de 8 lettres puis si il reste du temps, les mots entre 5 et 7 lettres
-dico=pickle.load(open('automate_plus_de_8_lettres', 'rb'))  # dico avec tous les mots de plus de 5 lettres pour faire plus de points
-dico2=pickle.load(open('automate_entre_5_et_7_lettres', 'rb'))
-dico3=pickle.load(open('automate_moins_de_4_lettres', 'rb'))
+#dico=pickle.load(open('automate_plus_de_8_lettres', 'rb'))  # dico avec tous les mots de plus de 5 lettres pour faire plus de points
+#dico2=pickle.load(open('automate_entre_5_et_7_lettres', 'rb'))
+#dico3=pickle.load(open('automate_moins_de_4_lettres', 'rb'))
 
 
 
@@ -50,17 +50,8 @@ def lancer(temps=125):
     # On récupère les données
     grille=capture.capturer()
 
-    # On cherche d'abord parmi les mots de plus de 8 lettres
+    # On cherche dans le dictionnaire
     for mot in IA.donner_mot(grille,dico) :
-        cliquer(mot)
-        if time()-t0> temps : break # On s'arrete si on dépasse le temps.
-
-    # S'il reste du temps on cherche parmi les mots entre 5 et 7 lettres
-    for mot in IA.donner_mot(grille,dico2) :
-        cliquer(mot)
-        if time()-t0> temps : break # On s'arrete si on dépasse le temps.
-    # S'il reste du temps on cherche parmi les mots de moins de 4 lettres
-    for mot in IA.donner_mot(grille,dico3) :
         cliquer(mot)
         if time()-t0> temps : break # On s'arrete si on dépasse le temps.
 
