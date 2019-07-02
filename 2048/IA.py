@@ -11,7 +11,8 @@ On teste au hasard des parties jusqu'à la fin et on compte quelle direction don
 from random import randint
 
 
-
+# Seuil de profondeur de recherche (On ne va pas jusqu'à être bloqué, on s'arrete après ce nombre de coup)
+seuil_profondeur=50
 
 #-------------------------- Fonctions auxiliaires
 
@@ -88,6 +89,7 @@ def est_complete(grille):
 def ajouter_case(grille):
     """
     Fonction qui ajoute un 1 ou un 2 aléatoirement dans la grille (ce qui se passe après chaque mouvement)
+    90% de chance d'avoir un 1, 10% d'avoir un 2
     Modifie la grille directement
     """
     # S'il reste au moins un 0
@@ -97,7 +99,8 @@ def ajouter_case(grille):
         l,c=randint(0,N-1),randint(0,N-1)
         while grille[l][c]!=0:
             l,c=randint(0,N-1),randint(0,N-1)
-        grille[l][c]=randint(1,2)
+        if randint(1,10) <= 9: grille[l][c]=1
+        else : grille[l][c]=2
 
 def donner_score(grille):
     """
@@ -138,6 +141,7 @@ def donner_direction(grille,nb_essais):
     # Liste des scores et du nombre d'essais effectués par direction
     scores=[0]*4
     essais=[0]*4
+    score_max=0
 
     compteur=0
     N=len(grille)
@@ -154,13 +158,18 @@ def donner_direction(grille,nb_essais):
         if appliquer_mvt(grille_temp,premiere_direction,N):
             fini=est_fini(grille_temp,N)
             ajouter_case(grille_temp)
-            while not fini :
+            compteur_seuil=0
+            while not fini and compteur_seuil<seuil_profondeur :
+                compteur_seuil+=1
                 # On joue au hasard tant qu'on n'a pas fini
                 if appliquer_mvt(grille_temp,randint(0,3),N) :
                     ajouter_case(grille_temp)
                 fini=est_fini(grille_temp,N)
             # On modifie le tableau des scores et du nombre d'essais
-            scores[premiere_direction]+=donner_score(grille_temp)
+            score=donner_score(grille_temp)
+            if score>score_max:
+                score_max=score
+            scores[premiere_direction]+=score
             essais[premiere_direction]+=1
 
         #afficher_grille(grille_temp)
@@ -178,6 +187,7 @@ def donner_direction(grille,nb_essais):
 
     #print(scores)
     #print(essais)
+    print("Score max atteint pendant les simulations :",score_max)
     return direction
 
 

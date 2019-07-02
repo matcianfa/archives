@@ -18,13 +18,15 @@ intercase=7
 # Décalage par rapport au bord de la case pour prélever la couleur
 decalage=10
 # Nombre de parties aléatoires qu'on teste avant de choisir la meilleur direction
-nb_essais=500
+nb_essais=5000
 # Dimension de la grille
 N=4
 # Distance sur laquelle on fait bouger la souris pour jouer un coup
 balayage_souris=100
 # Temps d'attente entre le coup joué et la capture d'écran suivante (en seconde)
 attente=0.3
+# Pour traduire le nombre en direction (0 pour droite etc.)
+trad_direction=["Droite","Haut","Gauche","Bas"]
 
 #--------------------------- Gestion des mouvements
 
@@ -40,7 +42,13 @@ def jouer(direction):
     elif direction==3: ag.drag(0,100)
 
 
+# -------------------------- Fonction aux
 
+def est_vide(grille):
+    for ligne in range(N):
+            for col in range(N):
+                if grille[ligne][col]!=0: return False
+    return True
 
 #--------------------------- Fonction principale
 
@@ -60,6 +68,11 @@ def lancer(grille=None,dim=N):
         print("Grille capturée")
         afficher_grille(grille_capturee)
 
+        # Si il n'y a que des 0, on s'arrete
+        if est_vide(grille_capturee):
+            print("Grille vide, c'est fini")
+            break
+
         compteur_de_0=0
         # On rajoute les 2 et les 4 présents
         for ligne in range(N):
@@ -77,16 +90,16 @@ def lancer(grille=None,dim=N):
         afficher_grille(grille)
         # On cherche le coup à jouer
         # Version à nombre d'essais fixe :
-        #direction_a_jouer=donner_direction(grille,nb_essais)
+        direction_a_jouer=donner_direction(grille,nb_essais)
 
         # Seconde version : moins il y a de zéros dans la grille, plus on fait d'essais
-        direction_a_jouer=donner_direction(grille,2000-130*compteur_de_0)
+        #direction_a_jouer=donner_direction(grille,5000-332*compteur_de_0)
 
 
         # Et on le joue virtuellement pour mettre à jour notre grille
         appliquer_mvt(grille,direction_a_jouer,N)
 
-        print("Direction jouée :",direction_a_jouer)
+        print("Direction jouée :",trad_direction[direction_a_jouer])
 
 
         # On joue le coup

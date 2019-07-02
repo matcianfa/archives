@@ -7,7 +7,7 @@ from PIL import Image, ImageGrab # Pour faire la capture d'ecran
 
 # Couleur qu'il faudra peut-être modifier selon la version utilisée
 # Il faut au moins les couleurs des cases vides, 1 et 2. Le reste sert uniquement à pouvoir reprendre une partie en cours
-couleur_to_valeur={(214, 205, 196):0,(238, 228, 218):1,(237, 224, 200):2,(242, 177, 121):3,(245, 149, 99):4,(246, 124, 95):5,(246, 94, 59):6,(237, 207, 114):7,(237, 204, 97):8,(237, 200, 80):9,(237, 197, 63):10}
+couleur_to_valeur={(214, 205, 196):0,(238, 228, 218):1,(237, 224, 200):2,(242, 177, 121):3,(245, 149, 99):4,(246, 124, 95):5,(246, 94, 59):6,(237, 207, 114):7,(237, 204, 97):8,(237, 200, 80):9,(237, 197, 63):10,(237, 194, 46):11}
 
 def capturer(x0,y0,x1,y1,intercase,decalage,N=4):
     """
