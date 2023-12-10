@@ -19,11 +19,45 @@ DIMENSION_MINI_BOITES = 40
 ESPACEMENT_BOITES = 75
 ESPACEMENT_MINI_BOITES = 30
 DELTA_MINI = DIMENSION_MINI_BOITES+ESPACEMENT_MINI_BOITES
+DIMENSION_BOUTONS = (120,30)
+
+# ---------- Classes
+
+class Jeu:
+
+    def __init__(self,nb_boites,nb_essais_max,fenetre,images):
+        self.nb_boites = nb_boites
+        self.nb_essais_max = nb_essais_max
+        self.fenetre = fenetre
+        self.images = images
+        self.nombre_essais = 0
+        self.numero_boite_cliquee = -1
+        # -1 = impossible, 0 = possible, 1 = case_choisie
+        self.grille_possibilites = [[-1 if i%(self.nb_boites+1) == 0 else 0 for i in range(self.nb_boites+2)] for __ in range(self.nb_essais_max+1)]
+        self.mode_jeu = "JEU"
+        self.mode_explication = False
+        self.liste_boites = self.donner_liste_boites()
+
+
+    def reset(self):
+        self.nombre_essais = 0
+        self.numero_boite_cliquee = -1
+        self.grille_possibilites = [[-1 if i%(self.nb_boites+1) == 0 else 0 for i in range(self.nb_boites+2)] for __ in range(self.nb_essais_max+1)]
+        self.mode_jeu = "JEU"
+        self.liste_boites = self.donner_liste_boites()
+
+    def donner_liste_boites(self):
+        x,y = (self.fenetre.get_width()-(self.nb_boites-1)*(DIMENSION_BOITES+ESPACEMENT_BOITES))//2,150
+        liste_boites = []
+        for k in range(self.nb_boites):
+            liste_boites.append(Image_cliquable(x,y,self.images,dimension = (DIMENSION_BOITES,DIMENSION_BOITES)))
+            x+= DIMENSION_BOITES + ESPACEMENT_BOITES
+        return liste_boites
 
 
 # ---------- Fonctions
 
-def jeu(nb_boites = NOMBRE_BOITES,nb_essais_max = NOMBRE_ESSAIS_MAX):
+def jouer(nb_boites = NOMBRE_BOITES,nb_essais_max = NOMBRE_ESSAIS_MAX):
     pygame.init()
     fenetre = pygame.display.set_mode(DIMENSION_FENETRE, pygame.RESIZABLE)
     pygame.display.set_caption("Hexapawn")
@@ -40,13 +74,8 @@ def jeu(nb_boites = NOMBRE_BOITES,nb_essais_max = NOMBRE_ESSAIS_MAX):
 
     # ------ Fonctions
 
-    def donner_liste_boites():
-        x,y = (fenetre.get_width()-(nb_boites-1)*(DIMENSION_BOITES+ESPACEMENT_BOITES))//2,150
-        liste_boites = []
-        for k in range(nb_boites):
-            liste_boites.append(Image_cliquable(x,y,[boite_fermee,boite_vide,chat],dimension = (DIMENSION_BOITES,DIMENSION_BOITES)))
-            x+= DIMENSION_BOITES + ESPACEMENT_BOITES
-        return liste_boites
+
+
 
     # ------ Images
     boite_fermee = pygame.image.load("images/boite_fermee.png").convert_alpha()
@@ -62,18 +91,59 @@ def jeu(nb_boites = NOMBRE_BOITES,nb_essais_max = NOMBRE_ESSAIS_MAX):
 
 
     # ------ init
-    nombre_essais = 0
-    numero_boite_cliquee = -1
-    boites_proposees = []
-    # -1 = impossible, 0 = possible, 1 = case_choisie
-    grille_possibilites = [[-1 if i%(nb_boites+1) == 0 else 0 for i in range(nb_boites+2)] for __ in range(nb_essais_max+1)]
+    jeu = Jeu(nb_boites,nb_essais_max,fenetre,[boite_fermee,boite_vide,chat])
 
 
     LISTE_OBJETS_CLIQUABLES = []
     LISTE_OBJETS_AFFICHES = []
-    LISTE_BOITES = donner_liste_boites()
+    #LISTE_BOITES = donner_liste_boites()
 
-    mode_jeu = "JEU"
+    # ---------- Boutons
+    # ----- Bouton Reset
+    position = (50,350)
+    dimension = DIMENSION_BOUTONS
+
+    def fonction_activation_nv_partie(*args,**kwargs):
+        jeu,*args = args
+        jeu.reset()
+        for boite in jeu.liste_boites :
+            boite.changer_image(0)
+
+    bouton = Bouton(position, dimension,font, texte="Recommencer",couleur = GRIS_CLAIR,fonction_activation = fonction_activation_nv_partie)
+    LISTE_OBJETS_CLIQUABLES.append(bouton)
+
+    # ----- Bouton Changement du nombre de boites
+    position = (50,400)
+    dimension = DIMENSION_BOUTONS
+
+    def fonction_activation_chgt_nb_boites(*args,**kwargs):
+        jeu,*args = args
+        if jeu.nb_boites != 5:
+            jeu.nb_boites = 5
+        else :
+            jeu.nb_boites = 6
+        jeu.nb_essais_max = 2*(jeu.nb_boites-2)
+        jeu.reset()
+        for boite in jeu.liste_boites :
+            boite.changer_image(0)
+
+    bouton = Bouton(position, dimension,font, texte="nb boites",couleur = GRIS_CLAIR,fonction_activation = fonction_activation_chgt_nb_boites)
+    LISTE_OBJETS_CLIQUABLES.append(bouton)
+
+    # ----- Bouton Explication
+    position = (50,450)
+    dimension = DIMENSION_BOUTONS
+
+    def fonction_activation_mode_explication(*args,**kwargs):
+        jeu,*args = args
+        jeu.mode_explication = not jeu.mode_explication
+        jeu.reset()
+        for boite in jeu.liste_boites :
+            boite.changer_image(0)
+
+    bouton = Bouton(position, dimension,font, texte="Explications",couleur = GRIS_CLAIR,fonction_activation = fonction_activation_mode_explication)
+    LISTE_OBJETS_CLIQUABLES.append(bouton)
+
 
     continuer=1
     while continuer:
@@ -89,72 +159,75 @@ def jeu(nb_boites = NOMBRE_BOITES,nb_essais_max = NOMBRE_ESSAIS_MAX):
                 continuer = 0                       # On arrête la boucle
             if event.type == pygame.VIDEORESIZE:    # Pour redimensionner la fenetre
                 fenetre = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-                LISTE_BOITES = donner_liste_boites()
+                jeu.reset()
 
             if event.type == MOUSEBUTTONUP and event.button == 1 :
                 m_x,m_y=event.pos
-                if mode_jeu == "JEU":
+                if jeu.mode_jeu == "JEU":
                     # On cherche si on a cliqué sur une boite
-                    for numero_boite,boite in enumerate(LISTE_BOITES) :
+                    for numero_boite,boite in enumerate(jeu.liste_boites) :
                         if boite.rect.collidepoint((m_x,m_y)):
-                            numero_boite_cliquee = numero_boite
+                            jeu.numero_boite_cliquee = numero_boite
 
-                            nombre_essais += 1
+                            jeu.nombre_essais += 1
                             # --- MaJ grille_possibilites
-                            grille_possibilites[nombre_essais][numero_boite_cliquee+1] = 1
+                            jeu.grille_possibilites[jeu.nombre_essais][jeu.numero_boite_cliquee+1] = 1
 
-                            if all([b!=0 for b in grille_possibilites[nombre_essais]]):
-                                mode_jeu = "GAGNE"
+                            if all([b!=0 for b in jeu.grille_possibilites[jeu.nombre_essais]]):
+                                jeu.mode_jeu = "GAGNE"
                                 print("Gagné !")
-                            elif nombre_essais == nb_essais_max:
-                                mode_jeu = "PERDU"
+                            elif jeu.nombre_essais == jeu.nb_essais_max:
+                                jeu.mode_jeu = "PERDU"
                                 # --- Recherche chemin possible
                                 i_chat = -1
-                                for e in range(nombre_essais,0,-1):
+                                for e in range(jeu.nombre_essais,0,-1):
                                     if i_chat == -1 :
-                                        i_chat = grille_possibilites[e].index(0)
-                                    elif grille_possibilites[e][i_chat-1] == 0:
+                                        i_chat = jeu.grille_possibilites[e].index(0)
+                                    elif jeu.grille_possibilites[e][i_chat-1] == 0:
                                         i_chat -= 1
-                                    elif grille_possibilites[e][i_chat+1] == 0:
+                                    elif jeu.grille_possibilites[e][i_chat+1] == 0:
                                         i_chat += 1
                                     else :
                                         print("Bug recherche chat")
-                                    grille_possibilites[e][i_chat] = 2
-
+                                    jeu.grille_possibilites[e][i_chat] = 2
+                                #print(jeu.grille_possibilites)
                             else :
-                                for i in range(1,nb_boites+1):
-                                    if grille_possibilites[nombre_essais][i-1] != 0 and grille_possibilites[nombre_essais][i+1] != 0:
-                                        grille_possibilites[nombre_essais+1][i] = -1
+                                for i in range(1,jeu.nb_boites+1):
+                                    if jeu.grille_possibilites[jeu.nombre_essais][i-1] != 0 and jeu.grille_possibilites[jeu.nombre_essais][i+1] != 0:
+                                        jeu.grille_possibilites[jeu.nombre_essais+1][i] = -1
 
         # -------------------- Affichage des objets
         # --------- Les boites
-        if numero_boite_cliquee>=0 :
-            for numero_boite,boite in enumerate(LISTE_BOITES) :
-                if numero_boite == numero_boite_cliquee :
-                    boite.changer_image(1 + (mode_jeu=="GAGNE"))
+        if jeu.numero_boite_cliquee>=0 :
+            for numero_boite,boite in enumerate(jeu.liste_boites) :
+                if numero_boite == jeu.numero_boite_cliquee :
+                    boite.changer_image(1 + (jeu.mode_jeu=="GAGNE"))
                 else :
                     boite.changer_image(0)
 
-        for objet in LISTE_BOITES :
+        for objet in jeu.liste_boites :
             objet.dessiner(fenetre)
 
         # --------- Les coups joués
-        x0, y = (fenetre.get_width()-(nb_boites-1)*(DELTA_MINI) - DIMENSION_MINI_BOITES)//2,150 + DIMENSION_BOITES
-        for ligne in range(1,NOMBRE_ESSAIS_MAX+1):
+        x0, y = (fenetre.get_width()-(jeu.nb_boites-1)*(DELTA_MINI) - DIMENSION_MINI_BOITES)//2,150 + DIMENSION_BOITES
+        for ligne in range(1,jeu.nb_essais_max+1):
             x=x0
-            for col in range(1,nb_boites+1):
-                if grille_possibilites[ligne][col] ==1 : #♣ Si on a cliqué
+            for col in range(1,jeu.nb_boites+1):
+                if jeu.grille_possibilites[ligne][col] ==1 : #♣ Si on a cliqué
                     fenetre.blit(mini_cercle,(x,y))
-                elif   grille_possibilites[ligne][col] ==2 : # Si on a un chat
+                elif   jeu.grille_possibilites[ligne][col] ==2 : # Si on a un chat
                     fenetre.blit(mini_chat,(x,y))
-                elif grille_possibilites[ligne][col] == -1 : # Si on ne sait pas
+                elif jeu.grille_possibilites[ligne][col] == -1 and jeu.mode_explication: #↨ Si il ne peut pas y avoir de chat
                     fenetre.blit(mini_croix,(x,y))
-                else :
+                else : # Si on ne sait pas
                     fenetre.blit(mini_boite_fermee,(x,y))
                 x += DELTA_MINI
             y += DELTA_MINI
 
-
+        # --- Les objets_cliquables
+        for obj_clic in LISTE_OBJETS_CLIQUABLES:
+            obj_clic.update(event_list,args_fonction = [jeu])
+            obj_clic.dessiner(fenetre)
 
 
 
@@ -210,4 +283,4 @@ def jeu_console(nb_boites = NOMBRE_BOITES,nb_essais_max = NOMBRE_ESSAIS_MAX):
 
 
 if __name__ == "__main__" :
-    jeu()
+    jouer()
